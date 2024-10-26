@@ -64,6 +64,10 @@ int main(int argc, char* argv[])
 	{
 		cols[i].id = i;
 		cols[i].populated = 0;
+		for (int j = 0; j < HEIGHT; j++)
+		{
+			cols[i].tasks[j].id = 0;
+		}
 	}
 
 	// read from file if possible
@@ -103,10 +107,9 @@ int main(int argc, char* argv[])
 		char *content = argv[2];
 		// create task
 		Task task;
-		task.id = 0;
+		task.id = -1;
 		task.content[0] = '\0';
 		// go to all columns, check all ids and go for the smaller available
-		int min_id = 0;
 		for (int i = 0; i < N_COLS; i++)
 		{
 			if (cols[i].populated == 0)
@@ -116,12 +119,12 @@ int main(int argc, char* argv[])
 			}
 			for (int j = 0; j < cols[i].populated; j++)
 			{
-				if (cols[i].tasks[j].id > min_id)
-					min_id = cols[i].tasks[j].id;
+				printf("%d\n", cols[i].tasks[j].id);
+				if (cols[i].tasks[j].id > task.id)
+					task.id = cols[i].tasks[j].id;
 			}
 		}
-		task.id = min_id;
-		printf("task id: %d\n", task.id);
+		task.id++; 
 
 		// set content to user input
 		strncat(task.content, content, sizeof(task.content) - strlen(content) - 1);
@@ -129,10 +132,9 @@ int main(int argc, char* argv[])
 
 		// add task to column (in this case, todo)
 		cols[TODO].tasks[cols[TODO].populated] = task;
-		printf("%d\n", cols[TODO].tasks[cols[TODO].populated]);
 
 		// update table
-		snprintf(table[cols[TODO].populated][TODO], MAX_BUF, "[%d] %s", task.id,task.content);
+		snprintf(table[cols[TODO].populated][TODO], MAX_BUF, "[%d] %s", task.id, task.content);
 
 		cols[TODO].populated++;
 		cols[TODO].id = TODO;
