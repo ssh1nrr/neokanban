@@ -29,5 +29,26 @@ typedef struct
 
 int main(int argc, char* argv[])
 {
+	char *table[HEIGHT][N_COLS];
+
+	FILE *data = fopen(data_file, "wb+");
+
+	Column cols[N_COLS];
+
+	Column *buf = malloc(sizeof(Column));
+	while(fread(buf, sizeof(buf), 1, data))
+	{
+		for (int i = 0; i < buf.populated; i++)
+		{
+			table[i][buf.id] = buf.task[i].content;
+		}
+	}
+	//
+	// for (int i = 0; i < N_COLS; i++)
+	// {
+	// 	cols[i].id = i;
+	// 	cols[i].populated = 0;
+	// }
+	//
 	return 0;
 }
