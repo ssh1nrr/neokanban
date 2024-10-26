@@ -48,20 +48,36 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	bool empty = true;
-
 	Column cols[N_COLS];
 
+	// build empty table and empty cols
+	for (int i = 0; i < HEIGHT; i++)
+	{
+		for (int j = 0; j < N_COLS; j++)
+		{
+			table[i][j] = malloc(sizeof(char) * MAX_BUF);
+			snprintf(table[i][j], MAX_BUF, "");
+			table[i][j][strlen(table[i][j])] = '\0';
+		}
+	}
+	for (int i = 0; i < N_COLS; i++)
+	{
+		cols[i].id = i;
+		cols[i].populated = 0;
+	}
+
+	// read from file if possible
 	Column *buf = malloc(sizeof(Column));
 	int cur_col = TODO;
 	while(fread(buf, sizeof(Column), 1, data))
 	{
-		empty = false;
 		cols[cur_col] = *buf;
 
 		for (int i = 0; i < buf->populated; i++)
 		{
-			table[i][buf->id] = strdup(buf->tasks[i].content);
+			table[i][buf->id] = malloc(sizeof(char) * MAX_BUF);
+			snprintf(table[i][buf->id], MAX_BUF, "[%d] %s", buf->tasks[i].id, buf->tasks[i].content);
+			table[i][buf->id][strlen(table[i][buf->id])] = '\0';
 		}
 		cur_col++;
 	}
@@ -69,30 +85,7 @@ int main(int argc, char* argv[])
 	free(buf);
 	fclose(data);
 
-	if (empty)
-	{
-		for (int i = 0; i < HEIGHT; i++)
-		{
-			for (int j = 0; j < N_COLS; j++)
-			{
-				table[i][j] = malloc(sizeof(char) * MAX_BUF);
-				snprintf(table[i][j], MAX_BUF, "");
-				table[i][j][strlen(table[i][j])] = '\0';
-			}
-		}
-		for (int i = 0; i < N_COLS; i++)
-		{
-			cols[i].id = -1;
-			cols[i].populated = 0;
-		}
-	}
-
-	// else
-	// {
-	// 	// TODO read table from file
-	// }
-
-	// add flag
+	// flags
 	if (argc == 1)
 	{
 		print_table(table);
@@ -116,7 +109,7 @@ int main(int argc, char* argv[])
 		int min_id = 0;
 		for (int i = 0; i < N_COLS; i++)
 		{
-			if (cols[i].id < 0)
+			if (cols[i].populated == 0)
 			{
 				// empty column
 				continue;
@@ -142,6 +135,7 @@ int main(int argc, char* argv[])
 		snprintf(table[cols[TODO].populated][TODO], MAX_BUF, "[%d] %s", task.id,task.content);
 
 		cols[TODO].populated++;
+		cols[TODO].id = TODO;
 
 		// update file
 		FILE *f = fopen(data_file, "wb");
@@ -149,13 +143,6 @@ int main(int argc, char* argv[])
 		fclose(f);
 		print_table(table);
 	}
-	//
-	// for (int i = 0; i < N_COLS; i++)
-	// {
-	// 	cols[i].id = i;
-	// 	cols[i].populated = 0;
-	// }
-	//
 	
 	// CLEANUP
 	for (int i = 0; i < HEIGHT; i++)
