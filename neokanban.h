@@ -53,7 +53,9 @@ void empty_table(char* table[HEIGHT][N_COLS]);
 void empty_cols(Column *cols);
 void read_from_file(Column* cols, char *table[HEIGHT][N_COLS]);
 void add_task(Column *cols, char* content, size_t col_id, int id);
-void upgrade_task(size_t id, Column* cols);
+void upgrade_task(size_t task_id, Column* cols);
+void downgrade_task(size_t task_id, Column* cols);
 Task *find_task(size_t task_id, Column *cols);
+void free_space(char *table[HEIGHT][N_COLS]);
 
 #endif

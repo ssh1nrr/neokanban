@@ -40,21 +40,26 @@ int main(int argc, char* argv[])
 		int task_id = atoi(argv[2]);
 		upgrade_task(task_id, &cols[0]);
 	}
+	else if (strcmp(flag, "--downgrade") == 0)
+	{
+		int task_id = atoi(argv[2]);
+		downgrade_task(task_id, &cols[0]);
+	}
+	else if (strcmp(flag, "--clean") == 0)
+	{
+		empty_table(table);
+		empty_cols(&cols[0]);
+		write_to_file(DATA_FILE, cols);
+	}
+	else if (strcmp(flag, "--help") == 0)
+	{
+		print_help();
+	}
 	
 	empty_table(table);
-	empty_cols(&cols[0]);
 	read_from_file(&cols[0], table);
 	print_table(table);
-
-	// CLEANUP
-	for (int i = 0; i < HEIGHT; i++)
-	{
-		for (int j = 0; j < N_COLS; j++)
-		{
-			free(table[i][j]);
-		}
-	}
-	return 0;
+	free_space(table);
 }
 
 void print_separator(void)
@@ -298,9 +303,38 @@ void upgrade_task(size_t task_id, Column *cols)
 	copy->col_id = t->col_id;
 	snprintf(copy->content, MAX_BUF, t->content);
 	
-	if (t->col_id == N_COLS - 1)
+	if (t->col_id == DONE)
 		return;
 	remove_task(t->id, cols);
-	add_task(&cols[0], copy->content, copy->col_id + 1, copy->id);
+	add_task(cols, copy->content, copy->col_id + 1, copy->id);
 	free(copy);
+}
+
+void downgrade_task(size_t task_id, Column* cols)
+{
+	Task *t = malloc(sizeof(Task));
+	Task *copy = malloc(sizeof(Task));
+
+	t = find_task(task_id, cols);
+	copy->id = t->id;
+	copy->col_id = t->col_id;
+	snprintf(copy->content, MAX_BUF, t->content);
+
+	if (t->col_id == TODO)
+		return;
+	remove_task(t->id, cols);
+	add_task(cols, copy->content, copy->col_id - 1, copy->id);
+	free(copy);
+}
+
+void free_space(char *table[HEIGHT][N_COLS])
+{
+	// CLEANUP
+	for (int i = 0; i < HEIGHT; i++)
+	{
+		for (int j = 0; j < N_COLS; j++)
+		{
+			free(table[i][j]);
+		}
+	}
 }
