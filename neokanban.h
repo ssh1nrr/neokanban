@@ -6,6 +6,7 @@
 #define N_COLS 3
 #define HEIGHT 5
 #define MAX_CELL_HEIGHT 10
+#define DATA_FILE ".data"
 
 typedef struct
 {
@@ -40,6 +41,7 @@ void print_separator(void);
 void print_header(void);
 void print_help(void);
 void print_row(char* row[]);
-
+void remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS]);
+void write_to_file(const char *file_name, Column *cols);
 
 #endif

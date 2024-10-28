@@ -9,24 +9,23 @@ const size_t TODO = 0;
 const size_t DOING = 1;
 const size_t DONE = 2;
 
-const char data_file[] = ".data";
+// const char *DATA_FILE = ".data";
 
 int main(int argc, char* argv[])
 {
 	char *table[HEIGHT][N_COLS];
+	Column cols[N_COLS];
 
-	FILE *data = fopen(data_file, "rb");
+	FILE *data = fopen(DATA_FILE, "rb");
 	if (!data)
 	{
-		data = fopen(data_file, "wb+");
+		data = fopen(DATA_FILE, "wb+");
 		if (!data)
 		{
 			printf("couldn't open file");
 			return 1;
 		}
 	}
-
-	Column cols[N_COLS];
 
 	// build empty table and empty cols
 	for (int i = 0; i < HEIGHT; i++)
@@ -35,7 +34,7 @@ int main(int argc, char* argv[])
 		{
 			table[i][j] = malloc(sizeof(char) * MAX_BUF);
 			table[i][j][0] = '\0';
-			strcpy(table[i][j], "");
+			// strcpy(table[i][j], "");
 		}
 	}
 	for (int i = 0; i < N_COLS; i++)
@@ -44,7 +43,7 @@ int main(int argc, char* argv[])
 		cols[i].populated = 0;
 		for (int j = 0; j < HEIGHT; j++)
 		{
-			cols[i].tasks[j].id = 0;
+			cols[i].tasks[j].id = -1;
 		}
 	}
 
@@ -115,12 +114,12 @@ int main(int argc, char* argv[])
 		cols[TODO].populated++;
 		cols[TODO].id = TODO;
 
-		// update file
-		FILE *f = fopen(data_file, "wb");
-		fwrite(&cols, sizeof(Column) * N_COLS, 1, f);
-		fclose(f);
-		print_table(table);
-
+		write_to_file(DATA_FILE, &cols[0]);
+	}
+	else if (strcmp(flag, "--remove") == 0)
+	{
+		int task_id = atoi(argv[2]);
+		remove_task(task_id, &cols[0], table);
 	}
 	
 	// CLEANUP
@@ -215,3 +214,53 @@ void print_help(void)
 	printf("\t--delete <id>\n");
 }
 
+void remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS])
+{
+	int col_found = -1;
+
+	for (int i = 0; i < N_COLS; i++)
+	{
+		for (int j = 0; j < HEIGHT; j++)
+		{
+			if(cols[i].tasks[j].id == task_id)
+			{
+				cols[i].tasks[j].content[0] = '\0';
+				col_found = i;
+				break;
+			}	
+		}
+		if(col_found > -1)
+			break;
+	}
+
+	size_t cur_len, next_len;
+	for (int i = 0; i < HEIGHT - 1; i++)
+	{
+		cur_len = strlen(cols[col_found].tasks[i].content);
+		next_len = strlen(cols[col_found].tasks[i + 1].content);
+		if (cur_len == 0 && next_len > 0)
+		{
+			strcpy(cols[col_found].tasks[i].content, 
+						cols[col_found].tasks[i + 1].content);
+			cols[col_found].tasks[i].id = cols[col_found].tasks[i + 1].id;
+			cols[col_found].tasks[i + 1].content[0]	= '\0';
+			cols[col_found].tasks[i + 1].id	= -1;
+			cols[col_found].populated--;
+			break;
+		}
+	}
+	write_to_file(DATA_FILE, cols);
+}
+
+void write_to_file(const char *file_name, Column *cols)
+{
+	Column cols_a[N_COLS];
+	for (int i = 0; i < N_COLS; i++)
+	{
+		cols_a[i] = cols[i];
+	}
+
+	FILE *f = fopen(file_name, "wb");
+	fwrite(&cols_a, sizeof(Column) * N_COLS, 1, f);
+	fclose(f);
+}

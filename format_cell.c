@@ -42,7 +42,7 @@ void format(size_t extra_lines,
 	word[0] = '\0';
 	line[0] = '\0';
 
-	if (strcmp(str, "") == 0)
+	if (strlen(str) == 0)
 	{
 		n_spaces = limit - len_b - len_e;
 		for (int i = 0; i < extra_lines + 1; i++)	
