@@ -47,5 +47,6 @@ void write_to_file(const char *file_name, Column *cols);
 void empty_table(char* table[HEIGHT][N_COLS]);
 void empty_cols(Column *cols);
 void read_from_file(Column* cols, char *table[HEIGHT][N_COLS]);
+void add_task(Column *cols, char* content, size_t col_id);
 
 #endif

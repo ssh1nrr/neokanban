@@ -18,7 +18,6 @@ int main(int argc, char* argv[])
 
 	empty_table(table);
 	empty_cols(&cols[0]);
-
 	read_from_file(&cols[0], table);
 
 	// flags
@@ -36,49 +35,12 @@ int main(int argc, char* argv[])
 
 	if (strcmp(flag, "--add") == 0)
 	{
-		char *content = argv[2];
-		// create task
-		Task task;
-		task.id = -1;
-		task.col_id = TODO;
-
-		task.content[0] = '\0';
-		// go to all columns, check all ids and go for the smaller available
-		for (int i = 0; i < N_COLS; i++)
-		{
-			if (cols[i].populated == 0)
-			{
-				// empty column
-				continue;
-			}
-			for (int j = 0; j < cols[i].populated; j++)
-			{
-				if (cols[i].tasks[j].id > task.id)
-					task.id = cols[i].tasks[j].id;
-			}
-		}
-		task.id++; 
-
-		// set content to user input
-		snprintf(task.content, MAX_BUF, content);
-
-		// add task to column (in this case, todo)
-		cols[TODO].tasks[cols[TODO].populated] = task;
-
-		// update table
-		snprintf(table[cols[TODO].populated][TODO], MAX_BUF, "[%d] %s", task.id, task.content);
-
-		cols[TODO].populated++;
-		cols[TODO].id = TODO;
-
-		write_to_file(DATA_FILE, &cols[0]);
+		add_task(&cols[0], argv[2], TODO);
 	}
 	else if (strcmp(flag, "--remove") == 0)
 	{
 		int task_id = atoi(argv[2]);
-		Task *t = malloc(sizeof(Task));
-		t = remove_task(task_id, &cols[0], table);
-		free(t);
+		remove_task(task_id, &cols[0], table);
 	}
 	
 	// CLEANUP
@@ -287,4 +249,38 @@ void read_from_file(Column *cols, char *table[HEIGHT][N_COLS])
 	}
 	fclose(data);
 	free(buf);
+}
+
+void add_task(Column *cols, char* content, size_t col_id)
+{
+	Task task;
+	task.id = -1;
+	task.col_id = col_id;
+
+	task.content[0] = '\0';
+	// go to all columns, check all ids and go for the smaller available
+	for (int i = 0; i < N_COLS; i++)
+	{
+		if (cols[i].populated == 0)
+		{
+			continue;
+		}
+		for (int j = 0; j < cols[i].populated; j++)
+		{
+			if (cols[i].tasks[j].id > task.id)
+				task.id = cols[i].tasks[j].id;
+		}
+	}
+	task.id++; 
+
+	// set content to user input
+	snprintf(task.content, MAX_BUF, content);
+
+	// add task to column (in this case, col_id)
+	cols[col_id].tasks[cols[col_id].populated] = task;
+
+	cols[col_id].populated++;
+	cols[col_id].id = col_id;
+
+	write_to_file(DATA_FILE, cols);
 }
