@@ -1,7 +1,7 @@
 #ifndef NEOKANBAN_H
 #define NEOKANBAN_H
 
-#define MAX_BUF 10000
+#define MAX_BUF 256
 #define COL_WIDTH 24
 #define N_COLS 3
 #define HEIGHT 5
