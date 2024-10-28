@@ -16,54 +16,10 @@ int main(int argc, char* argv[])
 	char *table[HEIGHT][N_COLS];
 	Column cols[N_COLS];
 
-	FILE *data = fopen(DATA_FILE, "rb");
-	if (!data)
-	{
-		data = fopen(DATA_FILE, "wb+");
-		if (!data)
-		{
-			printf("couldn't open file");
-			return 1;
-		}
-	}
+	empty_table(table);
+	empty_cols(&cols[0]);
 
-	// build empty table and empty cols
-	for (int i = 0; i < HEIGHT; i++)
-	{
-		for (int j = 0; j < N_COLS; j++)
-		{
-			table[i][j] = malloc(sizeof(char) * MAX_BUF);
-			table[i][j][0] = '\0';
-			// strcpy(table[i][j], "");
-		}
-	}
-	for (int i = 0; i < N_COLS; i++)
-	{
-		cols[i].id = i;
-		cols[i].populated = 0;
-		for (int j = 0; j < HEIGHT; j++)
-		{
-			cols[i].tasks[j].id = -1;
-		}
-	}
-
-	// read from file if possible
-	Column *buf = malloc(sizeof(Column));
-	int cur_col = TODO;
-	while(fread(buf, sizeof(Column), 1, data))
-	{
-		cols[cur_col] = *buf;
-
-		for (int i = 0; i < buf->populated; i++)
-		{
-			table[i][buf->id] = malloc(sizeof(char) * MAX_BUF);
-			snprintf(table[i][buf->id], MAX_BUF, "[%d] %s", buf->tasks[i].id, buf->tasks[i].content);
-		}
-		cur_col++;
-	}
-
-	free(buf);
-	fclose(data);
+	read_from_file(&cols[0], table);
 
 	// flags
 	if (argc == 1)
@@ -274,4 +230,61 @@ void write_to_file(const char *file_name, Column *cols)
 	FILE *f = fopen(file_name, "wb");
 	fwrite(&cols_a, sizeof(Column) * N_COLS, 1, f);
 	fclose(f);
+}
+
+void empty_table(char* table[HEIGHT][N_COLS])
+{
+	// build empty table and empty cols
+	for (int i = 0; i < HEIGHT; i++)
+	{
+		for (int j = 0; j < N_COLS; j++)
+		{
+			table[i][j] = malloc(sizeof(char) * MAX_BUF);
+			table[i][j][0] = '\0';
+		}
+	}
+}
+
+void empty_cols(Column *cols)
+{
+	for (int i = 0; i < N_COLS; i++)
+	{
+		cols[i].id = i;
+		cols[i].populated = 0;
+		for (int j = 0; j < HEIGHT; j++)
+		{
+			cols[i].tasks[j].id = -1;
+		}
+	}
+}
+
+void read_from_file(Column *cols, char *table[HEIGHT][N_COLS])
+{
+	FILE *data = fopen(DATA_FILE, "rb");
+	if (!data)
+	{
+		data = fopen(DATA_FILE, "wb+");
+		if (!data)
+		{
+			printf("couldn't open file");
+			return;
+		}
+	}
+
+	Column *buf = malloc(sizeof(Column));
+
+	int cur_col = TODO;
+	while(fread(buf, sizeof(Column), 1, data))
+	{
+		cols[cur_col] = *buf;
+
+		for (int i = 0; i < buf->populated; i++)
+		{
+			table[i][buf->id] = malloc(sizeof(char) * MAX_BUF);
+			snprintf(table[i][buf->id], MAX_BUF, "[%d] %s", buf->tasks[i].id, buf->tasks[i].content);
+		}
+		cur_col++;
+	}
+	fclose(data);
+	free(buf);
 }

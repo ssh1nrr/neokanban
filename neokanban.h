@@ -44,5 +44,8 @@ void print_help(void);
 void print_row(char* row[]);
 Task *remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS]);
 void write_to_file(const char *file_name, Column *cols);
+void empty_table(char* table[HEIGHT][N_COLS]);
+void empty_cols(Column *cols);
+void read_from_file(Column* cols, char *table[HEIGHT][N_COLS]);
 
 #endif
