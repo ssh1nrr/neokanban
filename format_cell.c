@@ -149,8 +149,7 @@ void format(size_t extra_lines,
 			append_char(line, ' ');
 		}
 		strncat(line, end, len_e);
-		container->text_a[n_lines] = malloc(sizeof(char) * MAX_BUF);
-		container->text_a[n_lines][0] = '\0';
+		container->text_a[n_lines] = calloc(1, sizeof(char) * MAX_BUF);
 		strcpy(container->text_a[n_lines], line);
 		n_lines++;
 	}

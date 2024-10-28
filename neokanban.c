@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 	if (argc == 1)
 	{
 		print_table(table);
+		free_space(table);
 		return 0;
 	}
 	if (argc > 3)
@@ -26,36 +27,36 @@ int main(int argc, char* argv[])
 
 	char *flag = argv[1];
 
-	if (strcmp(flag, "--add") == 0)
+	if (strcmp(flag, "--add") == 0 || strcmp(flag, "-a") == 0)
 	{
 		add_task(&cols[0], argv[2], TODO, -1);
 	}
-	else if (strcmp(flag, "--remove") == 0)
+	else if (strcmp(flag, "--remove") == 0 || strcmp(flag, "-r") == 0)
 	{
 		int task_id = atoi(argv[2]);
 		remove_task(task_id, &cols[0]);
 	}
-	else if (strcmp(flag, "--upgrade") == 0)
+	else if (strcmp(flag, "--upgrade") == 0 || strcmp(flag, "-u") == 0)
 	{
 		int task_id = atoi(argv[2]);
 		upgrade_task(task_id, &cols[0]);
 	}
-	else if (strcmp(flag, "--downgrade") == 0)
+	else if (strcmp(flag, "--downgrade") == 0 || strcmp(flag, "-d") == 0)
 	{
 		int task_id = atoi(argv[2]);
 		downgrade_task(task_id, &cols[0]);
 	}
-	else if (strcmp(flag, "--clean") == 0)
+	else if (strcmp(flag, "--clean") == 0 || strcmp(flag, "-c") == 0)
 	{
-		empty_table(table);
 		empty_cols(&cols[0]);
 		write_to_file(DATA_FILE, cols);
 	}
-	else if (strcmp(flag, "--help") == 0)
+	else if (strcmp(flag, "--help") == 0 || strcmp(flag, "-h") == 0)
 	{
 		print_help();
 	}
 	
+	free_space(table);
 	empty_table(table);
 	read_from_file(&cols[0], table);
 	print_table(table);
@@ -129,6 +130,10 @@ void print_row(char* row[])
 	// cleanup
 	for (int i = 0; i < N_COLS; i++)
 	{
+		for (int j = 0; j < biggest; j++)
+		{
+			free(s[i]->text_a[j]);
+		}
 		free(s[i]);
 	}
 }
@@ -189,8 +194,7 @@ void empty_table(char* table[HEIGHT][N_COLS])
 	{
 		for (int j = 0; j < N_COLS; j++)
 		{
-			table[i][j] = malloc(sizeof(char) * MAX_BUF);
-			table[i][j][0] = '\0';
+			table[i][j] = calloc(1, sizeof(char) * MAX_BUF);
 		}
 	}
 }
