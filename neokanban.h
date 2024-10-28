@@ -1,10 +1,10 @@
 #ifndef NEOKANBAN_H
 #define NEOKANBAN_H
 
-#define MAX_BUF 256
+#define MAX_BUF 4096
 #define COL_WIDTH 24
 #define N_COLS 3
-#define HEIGHT 5
+#define HEIGHT 10
 #define MAX_CELL_HEIGHT 10
 
 #define DATA_FILE ".data"

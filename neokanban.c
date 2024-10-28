@@ -194,7 +194,7 @@ void empty_table(char* table[HEIGHT][N_COLS])
 	{
 		for (int j = 0; j < N_COLS; j++)
 		{
-			table[i][j] = calloc(1, sizeof(char) * MAX_BUF);
+			table[i][j] = calloc(1, MAX_BUF);
 		}
 	}
 }
@@ -234,7 +234,7 @@ void read_from_file(Column *cols, char *table[HEIGHT][N_COLS])
 
 		for (int i = 0; i < buf->populated; i++)
 		{
-			table[i][buf->id] = malloc(sizeof(char) * MAX_BUF);
+			table[i][buf->id] = malloc(MAX_BUF);
 			snprintf(table[i][buf->id], MAX_BUF, "[%d] %s", buf->tasks[i].id, buf->tasks[i].content);
 		}
 		cur_col++;
