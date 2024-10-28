@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
 		// create task
 		Task task;
 		task.id = -1;
+		task.col_id = TODO;
 
 		task.content[0] = '\0';
 		// go to all columns, check all ids and go for the smaller available
@@ -119,7 +120,9 @@ int main(int argc, char* argv[])
 	else if (strcmp(flag, "--remove") == 0)
 	{
 		int task_id = atoi(argv[2]);
-		remove_task(task_id, &cols[0], table);
+		Task *t = malloc(sizeof(Task));
+		t = remove_task(task_id, &cols[0], table);
+		free(t);
 	}
 	
 	// CLEANUP
@@ -214,8 +217,10 @@ void print_help(void)
 	printf("\t--delete <id>\n");
 }
 
-void remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS])
+Task *remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS])
 {
+	Task *t = malloc(sizeof(Task));
+	Task *copy = malloc(sizeof(Task));
 	int col_found = -1;
 
 	for (int i = 0; i < N_COLS; i++)
@@ -224,8 +229,13 @@ void remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS])
 		{
 			if(cols[i].tasks[j].id == task_id)
 			{
-				cols[i].tasks[j].content[0] = '\0';
-				col_found = i;
+				t = &cols[i].tasks[j];
+				copy->id = t->id;
+				copy->col_id = t->col_id;
+				copy->content[0] = '\0';
+				snprintf(copy->content, MAX_BUF, t->content);
+				t->content[0] = '\0';
+				t->id = -1;
 				break;
 			}	
 		}
@@ -233,23 +243,24 @@ void remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS])
 			break;
 	}
 
+	Task *cur = malloc(sizeof(Task));
+	Task *next = malloc(sizeof(Task));
 	size_t cur_len, next_len;
-	for (int i = 0; i < HEIGHT - 1; i++)
+	for (int i = 0; i < cols[copy->col_id].populated - 1; i++)
 	{
-		cur_len = strlen(cols[col_found].tasks[i].content);
-		next_len = strlen(cols[col_found].tasks[i + 1].content);
-		if (cur_len == 0 && next_len > 0)
+		cur = &cols[copy->col_id].tasks[i];
+		next = &cols[copy->col_id].tasks[i + 1];
+		if (strlen(cur->content) == 0 && strlen(next->content) > 0)
 		{
-			strcpy(cols[col_found].tasks[i].content, 
-						cols[col_found].tasks[i + 1].content);
-			cols[col_found].tasks[i].id = cols[col_found].tasks[i + 1].id;
-			cols[col_found].tasks[i + 1].content[0]	= '\0';
-			cols[col_found].tasks[i + 1].id	= -1;
-			cols[col_found].populated--;
-			break;
+			snprintf(cur->content, MAX_BUF, next->content);
+			next->content[0] = '\0';
+			cur->id = next->id;
 		}
 	}
+	cols[copy->col_id].populated--;
 	write_to_file(DATA_FILE, cols);
+
+	return copy;
 }
 
 void write_to_file(const char *file_name, Column *cols)

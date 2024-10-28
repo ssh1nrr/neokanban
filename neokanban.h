@@ -1,7 +1,7 @@
 #ifndef NEOKANBAN_H
 #define NEOKANBAN_H
 
-#define MAX_BUF 256
+#define MAX_BUF 10000
 #define COL_WIDTH 24
 #define N_COLS 3
 #define HEIGHT 5
@@ -17,6 +17,7 @@ typedef struct
 typedef struct
 {
 	int id;
+	int col_id;
 	char content[MAX_BUF];
 } Task;
 
@@ -41,7 +42,7 @@ void print_separator(void);
 void print_header(void);
 void print_help(void);
 void print_row(char* row[]);
-void remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS]);
+Task *remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS]);
 void write_to_file(const char *file_name, Column *cols);
 
 #endif
