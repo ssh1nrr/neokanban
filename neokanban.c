@@ -2,14 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "neokanban.h"
-
-const size_t TODO = 0;
-const size_t DOING = 1;
-const size_t DONE = 2;
-
-// const char *DATA_FILE = ".data";
 
 int main(int argc, char* argv[])
 {
@@ -35,14 +28,24 @@ int main(int argc, char* argv[])
 
 	if (strcmp(flag, "--add") == 0)
 	{
-		add_task(&cols[0], argv[2], TODO);
+		add_task(&cols[0], argv[2], TODO, -1);
 	}
 	else if (strcmp(flag, "--remove") == 0)
 	{
 		int task_id = atoi(argv[2]);
-		remove_task(task_id, &cols[0], table);
+		remove_task(task_id, &cols[0]);
+	}
+	else if (strcmp(flag, "--upgrade") == 0)
+	{
+		int task_id = atoi(argv[2]);
+		upgrade_task(task_id, &cols[0]);
 	}
 	
+	empty_table(table);
+	empty_cols(&cols[0]);
+	read_from_file(&cols[0], table);
+	print_table(table);
+
 	// CLEANUP
 	for (int i = 0; i < HEIGHT; i++)
 	{
@@ -135,39 +138,21 @@ void print_help(void)
 	printf("\t--delete <id>\n");
 }
 
-Task *remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS])
+void remove_task(int task_id, Column *cols)
 {
 	Task *t = malloc(sizeof(Task));
-	Task *copy = malloc(sizeof(Task));
-	int col_found = -1;
 
-	for (int i = 0; i < N_COLS; i++)
-	{
-		for (int j = 0; j < HEIGHT; j++)
-		{
-			if(cols[i].tasks[j].id == task_id)
-			{
-				t = &cols[i].tasks[j];
-				copy->id = t->id;
-				copy->col_id = t->col_id;
-				copy->content[0] = '\0';
-				snprintf(copy->content, MAX_BUF, t->content);
-				t->content[0] = '\0';
-				t->id = -1;
-				break;
-			}	
-		}
-		if(col_found > -1)
-			break;
-	}
+	t = find_task(task_id, cols);
+	t->content[0] = '\0';
+	t->id = -1;
 
 	Task *cur = malloc(sizeof(Task));
 	Task *next = malloc(sizeof(Task));
 	size_t cur_len, next_len;
-	for (int i = 0; i < cols[copy->col_id].populated - 1; i++)
+	for (int i = 0; i < cols[t->col_id].populated - 1; i++)
 	{
-		cur = &cols[copy->col_id].tasks[i];
-		next = &cols[copy->col_id].tasks[i + 1];
+		cur = &cols[t->col_id].tasks[i];
+		next = &cols[t->col_id].tasks[i + 1];
 		if (strlen(cur->content) == 0 && strlen(next->content) > 0)
 		{
 			snprintf(cur->content, MAX_BUF, next->content);
@@ -175,10 +160,8 @@ Task *remove_task(int task_id, Column *cols, char* table[HEIGHT][N_COLS])
 			cur->id = next->id;
 		}
 	}
-	cols[copy->col_id].populated--;
+	cols[t->col_id].populated--;
 	write_to_file(DATA_FILE, cols);
-
-	return copy;
 }
 
 void write_to_file(const char *file_name, Column *cols)
@@ -251,36 +234,73 @@ void read_from_file(Column *cols, char *table[HEIGHT][N_COLS])
 	free(buf);
 }
 
-void add_task(Column *cols, char* content, size_t col_id)
+void add_task(Column *cols, char* content, size_t col_id, int id)
 {
 	Task task;
-	task.id = -1;
-	task.col_id = col_id;
 
-	task.content[0] = '\0';
-	// go to all columns, check all ids and go for the smaller available
-	for (int i = 0; i < N_COLS; i++)
+	if (id == -1)
 	{
-		if (cols[i].populated == 0)
+		task.id = -1;
+
+		// go to all columns, check all ids and go for the smaller available
+		for (int i = 0; i < N_COLS; i++)
 		{
-			continue;
+			if (cols[i].populated == 0)
+			{
+				continue;
+			}
+			for (int j = 0; j < cols[i].populated; j++)
+			{
+				if (cols[i].tasks[j].id > task.id)
+					task.id = cols[i].tasks[j].id;
+			}
 		}
-		for (int j = 0; j < cols[i].populated; j++)
-		{
-			if (cols[i].tasks[j].id > task.id)
-				task.id = cols[i].tasks[j].id;
-		}
+		task.id++; 
 	}
-	task.id++; 
+	else
+	{
+		task.id = id;
+	}
 
-	// set content to user input
+	task.col_id = col_id;
+	task.content[0] = '\0';
 	snprintf(task.content, MAX_BUF, content);
-
-	// add task to column (in this case, col_id)
 	cols[col_id].tasks[cols[col_id].populated] = task;
-
 	cols[col_id].populated++;
-	cols[col_id].id = col_id;
 
 	write_to_file(DATA_FILE, cols);
+}
+
+Task *find_task(size_t task_id, Column *cols)
+{
+	Task *t = malloc(sizeof(Task));
+	for (int i = 0; i < N_COLS; i++)
+	{
+		for (int j = 0; j < HEIGHT; j++)
+		{
+			if(cols[i].tasks[j].id == task_id)
+			{
+				t = &cols[i].tasks[j];
+				return t;
+			}	
+		}
+	}
+	return NULL;
+}
+
+void upgrade_task(size_t task_id, Column *cols)
+{
+	Task *t = malloc(sizeof(Task));
+	Task *copy = malloc(sizeof(Task));
+
+	t = find_task(task_id, cols);
+	copy->id = t->id;
+	copy->col_id = t->col_id;
+	snprintf(copy->content, MAX_BUF, t->content);
+	
+	if (t->col_id == N_COLS - 1)
+		return;
+	remove_task(t->id, cols);
+	add_task(&cols[0], copy->content, copy->col_id + 1, copy->id);
+	free(copy);
 }
