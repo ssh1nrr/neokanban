@@ -115,6 +115,15 @@ void print_row(char* row[])
 	
 	for (int i = 0; i < N_COLS; i++)
 	{
+		for (int j = 0; j < s[i]->n_lines; j++)
+		{
+			if (s[i]->n_lines < biggest)
+				free(s[i]->text_a[j]);
+		}
+	}
+
+	for (int i = 0; i < N_COLS; i++)
+	{
 		size_t xtra = biggest - s[i]->n_lines;
 		if (s[i]->n_lines < biggest)
 			format(xtra, i, row[i], COL_WIDTH, s[i]);
@@ -237,7 +246,6 @@ void read_from_file(Column *cols, char *table[HEIGHT][N_COLS])
 
 		for (int i = 0; i < buf->populated; i++)
 		{
-			table[i][buf->id] = calloc(1, MAX_BUF);
 			snprintf(table[i][buf->id], MAX_BUF, "[%d] %s", buf->tasks[i].id, buf->tasks[i].content);
 		}
 		cur_col++;
