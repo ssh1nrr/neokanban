@@ -4,13 +4,6 @@
 #include <stdbool.h>
 #include "neokanban.h"
 
-void append_char(char* str, char c)
-{
-	int len = strlen(str);
-	str[len] = c;
-	str[len + 1] = '\0';
-}
-
 int next_wlen(char* str)
 {
 	int len = 0;
@@ -28,10 +21,11 @@ void format(size_t extra_lines,
 						int limit, 
 						formatted_str *container)
 {
-	char* word = malloc(sizeof(char) * MAX_BUF);
-	char* line = malloc(sizeof(char) * MAX_BUF);
+	char* word = calloc(1, MAX_BUF);
+	char* line = calloc(1, MAX_BUF);
 
-	char* begin = col_id == 0 ? "| " : " ";
+	char* begin = col_id == 0 ? "|" : "";
+	char space = ' ';
 	char* end = " |";
 	int len_e = strlen(end);
 	int len_b = strlen(begin);
@@ -39,22 +33,19 @@ void format(size_t extra_lines,
 	size_t n_lines = 0;
 	size_t n_spaces;
 
-	word[0] = '\0';
-	line[0] = '\0';
-
-	if (strlen(str) == 0)
+	if (str[0] == '\0')
 	{
 		n_spaces = limit - len_b - len_e;
 		for (int i = 0; i < extra_lines + 1; i++)	
 		{
 			line[0] = '\0';
-			strncat(line, begin, len_b);
+			strcat(line, begin);
 			for (int j = 0; j < n_spaces; j++)
 			{
-				append_char(line, ' ');
+				strncat(line, &space, 1);
 			}
-			strncat(line, end, len_e);
-			container->text_a[i] = malloc(sizeof(char) * MAX_BUF);
+			strcat(line, end);
+			container->text_a[i] = malloc(MAX_BUF);
 			container->text_a[i][0] = '\0';
 			strcpy(container->text_a[i], line);
 			n_lines++;
@@ -79,62 +70,60 @@ void format(size_t extra_lines,
 	{
 		if (str[i] != ' ')
 		{
-			append_char(word, str[i]);
+			strncat(word, &str[i], 1);
 			continue;
 		}
-		strncat(line, word, strlen(word));
-		append_char(line, ' ');
-		size_t nxt_len = next_wlen(&str[i + 1]);
-		if (nxt_len > limit - strlen(line) - len_e)
+		strncat(line, &space, 1);
+		strcat(line, word);
+		word[0] = '\0';
+		int nxt_len = next_wlen(&str[i + 1]);
+		if (strlen(line) + nxt_len + len_e >= limit)
 		{
 			// next word doesn't fit
 			// add spaces and end
 			n_spaces = limit - strlen(line) - len_e;
 			for (int j = 0; j < n_spaces; j++)
 			{
-				append_char(line, ' ');
+				strncat(line, &space, 1);
 			}
-			strncat(line, end, len_e);
+			strcat(line, end);
 			// store and reset line
-			container->text_a[n_lines] = malloc(sizeof(char) * strlen(line) + 1);
-			container->text_a[n_lines][0] = '\0';
+			container->text_a[n_lines] = calloc(1, MAX_BUF);
 			strcpy(container->text_a[n_lines], line);
 			line[0] = '\0';
 			strcpy(line, begin);
 			n_lines++;
 		}
-		word[0] = '\0';
 	}
 
-	if (strlen(word) > 0)
+	if (word[0] != '\0')
 	{
-		if (strlen(line) + strlen(word) + len_e > limit)
+		if (strlen(line) + strlen(word) + len_e >= limit)
 		{
 			// word + line overflows
 			// write line first and setup a new one just for the word
 			n_spaces = limit - strlen(line) - len_e;
 			for (int i = 0; i < n_spaces; i++)
 			{
-				append_char(line, ' ');
+				strncat(line, &space, 1);
 			}
-			strncat(line, end, len_e);
-			container->text_a[n_lines] = malloc(sizeof(char) * MAX_BUF);
-			container->text_a[n_lines][0] = '\0';
+			strcat(line, end);
+			container->text_a[n_lines] = calloc(1, MAX_BUF);
 			strcpy(container->text_a[n_lines], line);
 			n_lines++;
 			line[0] = '\0';
 			strcpy(line, begin);
 		}
 
-		strncat(line, word, strlen(word));
+		strncat(line, &space, 1);
+		strcat(line, word);
 		n_spaces = limit - strlen(line) - len_e;
 		for (int i = 0; i < n_spaces; i++)
 		{
-			append_char(line, ' ');
+			strncat(line, &space, 1);
 		}
-		strncat(line, end, len_e);
-		container->text_a[n_lines] = malloc(sizeof(char) * MAX_BUF);
-		container->text_a[n_lines][0] = '\0';
+		strcat(line, end);
+		container->text_a[n_lines] = calloc(1, MAX_BUF);
 		strcpy(container->text_a[n_lines], line);
 		n_lines++;
 	}
@@ -143,13 +132,13 @@ void format(size_t extra_lines,
 	for (int i = 0; i < extra_lines; i++)	
 	{
 		line[0] = '\0';
-		strncat(line, begin, len_b);
+		strcat(line, begin);
 		for (int j = 0; j < n_spaces; j++)
 		{
-			append_char(line, ' ');
+			strncat(line, &space, 1);
 		}
-		strncat(line, end, len_e);
-		container->text_a[n_lines] = calloc(1, sizeof(char) * MAX_BUF);
+		strcat(line, end);
+		container->text_a[n_lines] = calloc(1, MAX_BUF);
 		strcpy(container->text_a[n_lines], line);
 		n_lines++;
 	}

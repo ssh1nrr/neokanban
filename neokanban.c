@@ -54,6 +54,8 @@ int main(int argc, char* argv[])
 	else if (strcmp(flag, "--help") == 0 || strcmp(flag, "-h") == 0)
 	{
 		print_help();
+		free_space(table);
+		return 0;
 	}
 	
 	free_space(table);
@@ -83,7 +85,7 @@ void print_separator(void)
 void print_header(void)
 {
 	print_separator();
-	char* titles[] = {"to-do", "doing", "done"};
+	char* titles[] = {"> to-do", "> doing", "> done"};
 	print_row(titles);
 	print_separator();
 }
@@ -140,12 +142,13 @@ void print_row(char* row[])
 
 void print_help(void)
 {
-	printf("usage: ./neokanban <options> [id,content]\n");
+	printf("\nusage: ./neokanban <options> [id,content]\n");
 	printf("options:\n");
-	printf("\t--add <content>\n");
-	printf("\t--upgrade <id>\n");
-	printf("\t--downgrade <id>\n");
-	printf("\t--delete <id>\n");
+	printf("\t--add, -a \"content\"\n");
+	printf("\t--upgrade, -u id\n");
+	printf("\t--downgrade, -d id\n");
+	printf("\t--remove, -r id\n");
+	printf("\t--clear, -c\n\n");
 }
 
 void remove_task(int task_id, Column *cols)
@@ -183,7 +186,7 @@ void write_to_file(const char *file_name, Column *cols)
 	}
 
 	FILE *f = fopen(file_name, "wb");
-	fwrite(&cols_a, sizeof(Column) * N_COLS, 1, f);
+	fwrite(&cols_a, sizeof(Column) * N_COLS + 1, 1, f);
 	fclose(f);
 }
 
@@ -225,7 +228,7 @@ void read_from_file(Column *cols, char *table[HEIGHT][N_COLS])
 		}
 	}
 
-	Column *buf = malloc(sizeof(Column));
+	Column *buf = calloc(1, sizeof(Column) + sizeof(Task) * HEIGHT + 1);
 
 	int cur_col = TODO;
 	while(fread(buf, sizeof(Column), 1, data))
@@ -234,7 +237,7 @@ void read_from_file(Column *cols, char *table[HEIGHT][N_COLS])
 
 		for (int i = 0; i < buf->populated; i++)
 		{
-			table[i][buf->id] = malloc(MAX_BUF);
+			table[i][buf->id] = calloc(1, MAX_BUF);
 			snprintf(table[i][buf->id], MAX_BUF, "[%d] %s", buf->tasks[i].id, buf->tasks[i].content);
 		}
 		cur_col++;

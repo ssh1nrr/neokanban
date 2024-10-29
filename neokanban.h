@@ -1,11 +1,11 @@
 #ifndef NEOKANBAN_H
 #define NEOKANBAN_H
 
-#define MAX_BUF 4096
+#define MAX_BUF 512
 #define COL_WIDTH 24
 #define N_COLS 3
 #define HEIGHT 10
-#define MAX_CELL_HEIGHT 10
+#define MAX_CELL_HEIGHT 20
 
 #define DATA_FILE ".data"
 
@@ -34,8 +34,8 @@ typedef struct
 } Column;
 
 
-extern void append_char(char* str, char c);
-extern int next_wlen(char* str);
+char *append_char(char* str, char c);
+int next_wlen(char* str);
 void format(size_t extra_lines,
 						size_t col_id,
 						char* str, 
