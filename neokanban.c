@@ -319,8 +319,8 @@ void upgrade_task(size_t task_id, Column *cols)
 
 void downgrade_task(size_t task_id, Column* cols)
 {
-	Task *t = malloc(sizeof(Task));
-	Task *copy = malloc(sizeof(Task));
+	Task *t = calloc(1, sizeof(Task));
+	Task *copy = calloc(1, sizeof(Task));
 
 	t = find_task(task_id, cols);
 	copy->id = t->id;
