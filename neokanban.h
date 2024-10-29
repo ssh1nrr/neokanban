@@ -2,7 +2,7 @@
 #define NEOKANBAN_H
 
 #define MAX_BUF 512
-#define COL_WIDTH 24
+#define COL_WIDTH 27
 #define N_COLS 3
 #define HEIGHT 10
 #define MAX_CELL_HEIGHT 20

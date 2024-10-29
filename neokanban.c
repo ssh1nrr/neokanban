@@ -159,14 +159,14 @@ void remove_task(int task_id, Column *cols)
 	t->content[0] = '\0';
 	t->id = -1;
 
-	Task *cur = malloc(sizeof(Task));
-	Task *next = malloc(sizeof(Task));
+	Task *cur = calloc(1, sizeof(Task));
+	Task *next = calloc(1, sizeof(Task));
 	size_t cur_len, next_len;
 	for (int i = 0; i < cols[t->col_id].populated - 1; i++)
 	{
 		cur = &cols[t->col_id].tasks[i];
 		next = &cols[t->col_id].tasks[i + 1];
-		if (strlen(cur->content) == 0 && strlen(next->content) > 0)
+		if (cur->content[0] == '\0' && next->content[0] != '\0')
 		{
 			snprintf(cur->content, MAX_BUF, next->content);
 			next->content[0] = '\0';
