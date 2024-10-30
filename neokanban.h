@@ -34,7 +34,6 @@ typedef struct
 } Column;
 
 
-char *append_char(char* str, char c);
 int next_wlen(char* str);
 void format(size_t extra_lines,
 						size_t col_id,
