@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 		int task_id = atoi(argv[2]);
 		downgrade_task(task_id, &cols[0]);
 	}
-	else if (strcmp(flag, "--clean") == 0 || strcmp(flag, "-c") == 0)
+	else if (strcmp(flag, "--clear") == 0 || strcmp(flag, "-c") == 0)
 	{
 		empty_cols(&cols[0]);
 		write_to_file(DATA_FILE, cols);
