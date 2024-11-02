@@ -163,25 +163,20 @@ void print_help(void)
 void remove_task(int task_id, Column *cols)
 {
 	Task *t = malloc(sizeof(Task));
-
 	t = find_task(task_id, cols);
-	t->content[0] = '\0';
-	t->id = -1;
-
-	Task *cur = calloc(1, sizeof(Task));
-	Task *next = calloc(1, sizeof(Task));
-	size_t cur_len, next_len;
+	// remove task and fix space left in column
 	for (int i = 0; i < cols[t->col_id].populated - 1; i++)
 	{
-		cur = &cols[t->col_id].tasks[i];
-		next = &cols[t->col_id].tasks[i + 1];
-		if (cur->content[0] == '\0' && next->content[0] != '\0')
-		{
-			snprintf(cur->content, MAX_BUF, next->content);
-			next->content[0] = '\0';
-			cur->id = next->id;
-		}
+		if (&cols[t->col_id].tasks[i] != t)
+			continue;
+		t->id = cols[t->col_id].tasks[i + 1].id;
+		t->content[0] = '\0';
+		snprintf(t->content, MAX_BUF, cols[t->col_id].tasks[i + 1].content);
+
+		t = &cols[t->col_id].tasks[i + 1];
 	}
+	t->content[0] = '\0';
+	t->id = -1;
 	cols[t->col_id].populated--;
 	write_to_file(DATA_FILE, cols);
 }
