@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	DATA_FILE = calloc(1, MAX_BUF);
-	strncat(DATA_FILE, argv[1], 1);
+	sprintf(DATA_FILE, "%s", argv[1]);
 
 	char *table[HEIGHT][N_COLS];
 	Column cols[N_COLS];
