@@ -4,8 +4,18 @@
 #include <string.h>
 #include "neokanban.h"
 
+static char *DATA_FILE;
+
 int main(int argc, char* argv[])
 {
+	if (argc < 2 || argc > 4)
+	{
+		print_help();
+		return 0;
+	}
+	DATA_FILE = calloc(1, MAX_BUF);
+	strncat(DATA_FILE, argv[1], 1);
+
 	char *table[HEIGHT][N_COLS];
 	Column cols[N_COLS];
 
@@ -13,37 +23,32 @@ int main(int argc, char* argv[])
 	empty_cols(&cols[0]);
 	read_from_file(&cols[0], table);
 
-	// flags
-	if (argc == 1)
+	if (argc == 2)
 	{
 		print_table(table);
 		free_space(table);
 		return 0;
 	}
-	if (argc > 3)
-	{
-		print_help();
-	}
 
-	char *flag = argv[1];
+	char *flag = argv[2];
 
 	if (strcmp(flag, "--add") == 0 || strcmp(flag, "-a") == 0)
 	{
-		add_task(&cols[0], argv[2], TODO, -1);
+		add_task(&cols[0], argv[3], TODO, -1);
 	}
 	else if (strcmp(flag, "--remove") == 0 || strcmp(flag, "-r") == 0)
 	{
-		int task_id = atoi(argv[2]);
+		int task_id = atoi(argv[3]);
 		remove_task(task_id, &cols[0]);
 	}
 	else if (strcmp(flag, "--upgrade") == 0 || strcmp(flag, "-u") == 0)
 	{
-		int task_id = atoi(argv[2]);
+		int task_id = atoi(argv[3]);
 		upgrade_task(task_id, &cols[0]);
 	}
 	else if (strcmp(flag, "--downgrade") == 0 || strcmp(flag, "-d") == 0)
 	{
-		int task_id = atoi(argv[2]);
+		int task_id = atoi(argv[3]);
 		downgrade_task(task_id, &cols[0]);
 	}
 	else if (strcmp(flag, "--clear") == 0 || strcmp(flag, "-c") == 0)
@@ -75,6 +80,7 @@ int main(int argc, char* argv[])
 	read_from_file(&cols[0], table);
 	print_table(table);
 	free_space(table);
+	free(DATA_FILE);
 }
 
 void move_task(int task_id, Column *cols, int dest_col_id)
@@ -178,7 +184,7 @@ void print_row(char* row[])
 
 void print_help(void)
 {
-	printf("\nusage: ./neokanban <options> [id,content]\n");
+	printf("\nusage: ./neokanban <file> <option> [id,content]\n");
 	printf("options:\n");
 	printf("\t--add, -a \"content\"\n");
 	printf("\t\tadds a task to the table\n");
@@ -187,7 +193,7 @@ void print_help(void)
 	printf("\t--downgrade, -d id\n");
 	printf("\t\tmoves task of given id to the previous column\n");
 	printf("\t--remove, -r id\n");
-	printf("\t\tremoves task of given id from the table\n");
+	printf("\t\tremoves task of given id from table\n");
 	printf("\t--clear, -c\n");
 	printf("\t\tremoves all tasks from table\n");
 	printf("\t--reset\n");

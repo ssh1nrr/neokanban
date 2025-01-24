@@ -7,8 +7,6 @@
 #define HEIGHT					10
 #define MAX_CELL_HEIGHT 20
 
-#define DATA_FILE				".data"
-
 #define TODO						0
 #define DOING						1
 #define DONE						2
