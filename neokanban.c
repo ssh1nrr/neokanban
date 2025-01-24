@@ -51,6 +51,18 @@ int main(int argc, char* argv[])
 		empty_cols(&cols[0]);
 		write_to_file(DATA_FILE, cols);
 	}
+	else if (strcmp(flag, "--reset") == 0)
+	{
+		// go to all tasks from doing and done
+		for (int i = DOING; i <= DONE; i++)
+		{
+			for (int j = 0; j < cols[i].populated; j++)
+			{
+				// remove them and place into todo
+				move_task(cols[i].tasks[j].id, &cols[0], TODO);
+			}
+		}
+	}
 	else if (strcmp(flag, "--help") == 0 || strcmp(flag, "-h") == 0)
 	{
 		print_help();
@@ -63,6 +75,21 @@ int main(int argc, char* argv[])
 	read_from_file(&cols[0], table);
 	print_table(table);
 	free_space(table);
+}
+
+void move_task(int task_id, Column *cols, int dest_col_id)
+{
+	Task *t = malloc(sizeof(Task));
+	Task *copy = malloc(sizeof(Task));
+
+	t = find_task(task_id, cols);
+	copy->id = t->id;
+	copy->col_id = t->col_id;
+	snprintf(copy->content, MAX_BUF, t->content);
+	
+	remove_task(t->id, cols);
+	add_task(cols, copy->content, dest_col_id, copy->id);
+	free(copy);
 }
 
 void print_separator(void)
@@ -154,10 +181,17 @@ void print_help(void)
 	printf("\nusage: ./neokanban <options> [id,content]\n");
 	printf("options:\n");
 	printf("\t--add, -a \"content\"\n");
+	printf("\t\tadds a task to the table\n");
 	printf("\t--upgrade, -u id\n");
+	printf("\t\tmoves task of given id to the next column\n");
 	printf("\t--downgrade, -d id\n");
+	printf("\t\tmoves task of given id to the previous column\n");
 	printf("\t--remove, -r id\n");
-	printf("\t--clear, -c\n\n");
+	printf("\t\tremoves task of given id from the table\n");
+	printf("\t--clear, -c\n");
+	printf("\t\tremoves all tasks from table\n");
+	printf("\t--reset\n");
+	printf("\t\tmoves all tasks to the \"todo\" column\n\n");
 }
 
 void remove_task(int task_id, Column *cols)

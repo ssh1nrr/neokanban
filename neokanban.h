@@ -47,6 +47,7 @@ void print_help(void);
 void print_row(char* row[]);
 void add_task(Column *cols, char* content, size_t col_id, int id);
 void remove_task(int task_id, Column *cols);
+void move_task(int task_id, Column *cols, int dest_col_id);
 void upgrade_task(size_t task_id, Column* cols);
 void downgrade_task(size_t task_id, Column* cols);
 Task *find_task(size_t task_id, Column *cols);
