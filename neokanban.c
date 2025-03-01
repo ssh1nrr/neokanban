@@ -8,6 +8,7 @@ static char *DATA_FILE;
 
 int main(int argc, char* argv[])
 {
+  system("clear");
 	if (argc < 2 || argc > 4)
 	{
 		print_help();
@@ -184,7 +185,7 @@ void print_row(char* row[])
 
 void print_help(void)
 {
-	printf("\nusage: ./neokanban <file> <option> [id,content]\n");
+	printf("usage: ./neokanban <file> <option> [id,content]\n");
 	printf("options:\n");
 	printf("\t--add, -a \"content\"\n");
 	printf("\t\tadds a task to the table\n");
