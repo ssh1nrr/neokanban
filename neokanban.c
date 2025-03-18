@@ -92,7 +92,7 @@ void move_task(int task_id, Column *cols, int dest_col_id)
 	t = find_task(task_id, cols);
 	copy->id = t->id;
 	copy->col_id = t->col_id;
-	snprintf(copy->content, MAX_BUF, t->content);
+	snprintf(copy->content, MAX_BUF, "%s", t->content);
 	
 	remove_task(t->id, cols);
 	add_task(cols, copy->content, dest_col_id, copy->id);
@@ -212,7 +212,7 @@ void remove_task(int task_id, Column *cols)
 			continue;
 		t->id = cols[t->col_id].tasks[i + 1].id;
 		t->content[0] = '\0';
-		snprintf(t->content, MAX_BUF, cols[t->col_id].tasks[i + 1].content);
+		snprintf(t->content, MAX_BUF, "%s", cols[t->col_id].tasks[i + 1].content);
 
 		t = &cols[t->col_id].tasks[i + 1];
 	}
@@ -320,7 +320,7 @@ void add_task(Column *cols, char* content, size_t col_id, int id)
 
 	task.col_id = col_id;
 	task.content[0] = '\0';
-	snprintf(task.content, MAX_BUF, content);
+	snprintf(task.content, MAX_BUF, "%s", content);
 	cols[col_id].tasks[cols[col_id].populated] = task;
 	cols[col_id].populated++;
 
@@ -352,7 +352,7 @@ void upgrade_task(size_t task_id, Column *cols)
 	t = find_task(task_id, cols);
 	copy->id = t->id;
 	copy->col_id = t->col_id;
-	snprintf(copy->content, MAX_BUF, t->content);
+	snprintf(copy->content, MAX_BUF, "%s", t->content);
 	
 	if (t->col_id == DONE)
 		return;
@@ -369,7 +369,7 @@ void downgrade_task(size_t task_id, Column* cols)
 	t = find_task(task_id, cols);
 	copy->id = t->id;
 	copy->col_id = t->col_id;
-	snprintf(copy->content, MAX_BUF, t->content);
+	snprintf(copy->content, MAX_BUF, "%s", t->content);
 
 	if (t->col_id == TODO)
 		return;
